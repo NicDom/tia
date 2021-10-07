@@ -46,9 +46,9 @@ tia --help
 
 or with `Poetry`:
 
-````bash
+```bash
 poetry run tia --help
-
+```
 
 
 <details>
@@ -59,7 +59,7 @@ To download and install Poetry run (with curl):
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
-````
+```
 
 or on windows (without curl):
 
