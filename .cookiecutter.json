@@ -1,0 +1,17 @@
+{
+  "_all_python_minor_version": [6, 7, 8, 9],
+  "_template": "template",
+  "author": "Niclas D. Gesing",
+  "create_example_template": "cli",
+  "development_status": "Development Status :: 1 - Planning",
+  "email": "nicdomgesing@gmail.com",
+  "friendly_name": "TIA",
+  "github_user": "NicDom",
+  "license": "MIT",
+  "line_length": "88",
+  "minimal_python_version": "3.7",
+  "package_name": "tia",
+  "project_description": "A Tax and Invoice Assistant (TIA)",
+  "project_name": "tia",
+  "version": "0.1.0"
+}
