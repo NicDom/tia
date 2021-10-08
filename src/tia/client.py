@@ -1,13 +1,24 @@
 """Module for clients in TIA."""
-from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Union
+from typing import TypedDict
 
 import pydantic
 from tabulate import tabulate  # type: ignore
 
 from tia.basemodels import CompanyAndClientABCBaseModel
+
+
+class ClientDict(TypedDict):
+    """TypedDict for `Client`."""
+
+    name: str
+    street: str
+    plz: str
+    country: str
+    email: str
+    invoicemail: Optional[str]
+    remindermail: Optional[str]
 
 
 def client_alias_generator(string: str) -> str:
@@ -28,15 +39,6 @@ def client_alias_generator(string: str) -> str:
     return "client" + string
 
 
-# class ClientBaseModel(CompanyAndClientABCBaseModel):
-#     """New BaseModel containing the config class."""
-
-#     class Config:
-#         """Config for ClientBaseModel"""
-#         alias_generator = client_alias_generator
-
-
-# @dataclass(config=C)
 class Client(CompanyAndClientABCBaseModel):
     """Dataclass for client data.
 
@@ -49,9 +51,9 @@ class Client(CompanyAndClientABCBaseModel):
         city (str): The city of the clients location.
         country (str): The country of the clients location.
         email (str): The official mail of the client.
-        invoicemail (str): The mail to which invoices needs to be sent. Set to
+        invoicemail (str, optional): The mail to which invoices needs to be sent. Set to
             mail, if omitted.
-        remindermail (str): The mail to which reminder needs to be sent. Set
+        remindermail (str, optional): The mail to which reminder needs to be sent. Set
             to mail, if omitted.
     """
 
@@ -77,7 +79,7 @@ class Client(CompanyAndClientABCBaseModel):
     @pydantic.validator("remindermail", "invoicemail", always=True)
     @classmethod
     def are_invoicemail_or_remindermail_given(
-        cls, v: Optional[str], values: Dict[str, Union[str, None]]
+        cls, v: Optional[str], values: ClientDict
     ) -> str:
         """Checks if invoicemail and/or remindermail are given.
 
@@ -87,7 +89,7 @@ class Client(CompanyAndClientABCBaseModel):
 
         Args:
             v (Optional[str]): The value of `invoicemail` or `remindermails`
-            values (Dict[str, Union[str, None]]): The dictionary of values of the class.
+            values (ClientDict): The dictionary of values of the class.
 
         Returns:
             str: `v` or `values["email"]`.

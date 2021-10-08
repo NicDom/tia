@@ -3,7 +3,7 @@ from typing import Dict
 
 import pytest
 from pydantic import ValidationError
-from tabulate import tabulate
+from tabulate import tabulate  # type: ignore
 
 from tia.client import Client
 
