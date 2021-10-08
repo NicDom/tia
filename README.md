@@ -50,7 +50,6 @@ or with `Poetry`:
 poetry run tia --help
 ```
 
-
 <details>
 <summary>Installing Poetry</summary>
 <p>

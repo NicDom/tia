@@ -33,6 +33,10 @@ python = "^3.7.1"
 importlib_metadata = {version = "^4.5.0", python = "<3.8"}
 typer = {extras = ["all"], version = "^0.4.0"}
 rich = "^10.7.0"
+pydantic = "^1.8.2"
+tabulate = "^0.8.9"
+orjson = "^3.6.4"
+pyfakefs = "^4.5.1"
 
 
 [tool.poetry.dev-dependencies]
@@ -59,6 +63,8 @@ pre-commit-hooks = "^4.0.1"
 sphinx-rtd-theme = "^1.0.0"
 sphinx-click = "^3.0.1"
 Pygments = "^2.9.0"
+faker = "^9.2.0"
+pyfakefs = "^4.5.1"
 
 [tool.poetry.scripts]
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
