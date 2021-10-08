@@ -9,18 +9,16 @@ import os
 import pathlib
 
 import orjson
-from pydantic.types import DirectoryPath
-from pydantic.types import FilePath
 
 
-def create_directory(path: Union[pathlib.Path, str]) -> DirectoryPath:
+def create_directory(path: Union[pathlib.Path, str]) -> pathlib.Path:
     """Creates recursively the given directory under `path`.
 
     Args:
         path (str): Path of the directory, we want to create.
 
     Returns:
-        DirectoryPath: The path.
+        pathlib.Path: The path.
     """
     path = pathlib.Path(path)
     if not path.is_dir():
@@ -28,7 +26,7 @@ def create_directory(path: Union[pathlib.Path, str]) -> DirectoryPath:
     return path
 
 
-def orjson_load(filename: FilePath) -> Any:
+def orjson_load(filename: Union[str, pathlib.Path]) -> Any:
     """Returns data of the file under `filename` using `orjson.loads`.
 
     Args:
@@ -43,12 +41,12 @@ def orjson_load(filename: FilePath) -> Any:
     return orjson.loads(data)
 
 
-def file2class(cls: Type[Any], file: FilePath) -> Any:
+def file2class(cls: Type[Any], file: Union[str, pathlib.Path]) -> Any:
     """Returns an instance of `cls` using the data in `file`.
 
     Args:
         cls (AnyObject): The class, of which we want to create an instance.
-        file (FilePath): The FilePath of the file.
+        file (Union[str, pathlib.Path]): The FilePath of the file.
 
     Returns:
         Any: An instance of cls.
