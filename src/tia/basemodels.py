@@ -1,6 +1,7 @@
 """basemodels for TIA."""
 from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Generic
 from typing import Iterator
 from typing import List
@@ -40,7 +41,7 @@ BS_BASENAME = "EUR_"
 
 SUPPORTED_LANGUAGES = ["english", "german"]
 
-ItemType = TypeVar("ItemType", bound="TiaItemModel")
+ItemType = TypeVar("ItemType")
 
 
 class PatchedModel(BaseModel):  # pragma: no cover
@@ -63,7 +64,7 @@ class PatchedModel(BaseModel):  # pragma: no cover
 
 
 def orjson_dumps(
-    obj: BaseModel, *, default: Callable[..., Any] = pydantic_encoder
+    obj: Dict[str, Any], *, default: Callable[..., Any] = pydantic_encoder
 ) -> str:
     """Default `json_dumps` for TIA.
 
@@ -227,17 +228,18 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
             )
         return v
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: object) -> Any:
         """__eq__ of `TypedList`.
 
         `TypedList` is equal to another subclass of `list`, if all elements are equal.
 
         Args:
-            other (object):
-                The other list or `TypedList`.
+            other (object): The other list or `TypedList`.
 
         Returns:
-            bool: `True`, if all elements of the objects are equal, else `False`.
+            Any: `NotImplemented` if other is no instance of `list`. If other is
+                instance of `list`: `True`, if all elements of the objects are equal,
+                else `False`.
         """
         if not isinstance(other, list):
             return NotImplemented
@@ -331,7 +333,7 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
             List[List[Any]]: Dataframe for the `TypedList`.
         """
         try:
-            return [[value for value in item.__values__] for item in self.items]
+            return [[value for value in item.__values__] for item in self.items]  # type: ignore # noqa: B950
         except AttributeError:
             return self.items
 
@@ -345,7 +347,7 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
             List[str]: Headers for a table displaying the class.
         """
         try:
-            return self.item_type.__headers__()
+            return self.item_type.__headers__()  # type: ignore
         except AttributeError:
             return []
 
@@ -360,7 +362,7 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
         """
         try:
             return [self.headers] + list(
-                map(self.item_type.__format_values__, self.items)
+                map(self.item_type.__format_values__, self.items)  # type: ignore
             )
         except AttributeError:
             return str(self.items)

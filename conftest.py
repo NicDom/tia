@@ -1,9 +1,9 @@
 """conftest of TIA."""
+from typing import Dict
+
 import pathlib
 
 import pytest
-
-from tests.test_basemodels import Person
 
 DIR_NAMES = ["parent_dir", "pdf_parent_dir", "pdf_invoice_dir", "pdf_eur_dir"]
 
@@ -21,9 +21,9 @@ def random_seed():
 
 
 @pytest.fixture
-def some_person(faker) -> Person:
-    """Returns some `Person`."""
-    return Person(first_name=faker.first_name(), last_name=faker.last_name())
+def some_person(faker) -> Dict[str, str]:
+    """Returns dict some `Person`."""
+    return {"first_name": faker.first_name(), "last_name": faker.last_name()}
 
 
 @pytest.fixture
