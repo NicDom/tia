@@ -72,6 +72,39 @@ def other_invoiceitem(faker):
 
 
 @pytest.fixture
+def acc_item_default() -> Dict[str, Any]:
+    """Returns default dict for an `AccountingItem`."""
+    return {
+        "description": "Clear movement lay end.",
+        "subtotal": 0.721918685087275,
+    }
+
+
+@pytest.fixture
+def acc_item_1(faker) -> Dict[str, Any]:
+    """Returns a dict for an `AccountingItem`."""
+    return {
+        "description": faker.sentence(nb_words=5),
+        "value": 0.7,
+        "currency": "€",
+        "vat": 3.5,
+        "date": faker.date_object(),
+    }
+
+
+@pytest.fixture
+def acc_item_2(faker) -> Dict[str, Any]:
+    """Returns a dict for an `AccountingItem`."""
+    return {
+        "description": faker.sentence(nb_words=5),
+        "value": 10.1,
+        "currency": "€",
+        "vat": 4,
+        "date": faker.date_object(),
+    }
+
+
+@pytest.fixture
 def some_client():
     """Returns a dict for a `Client`."""
     client_option_1 = {
