@@ -166,19 +166,16 @@ class TiaItemModel(TiaBaseModel, ABC):
             float: The tax of the item.
         """
 
-    @classmethod
-    def __format_values__(cls, row: "TiaItemModel") -> List[str]:
-        """String formatting rule for the individual attributes of the class.
+    @property
+    def __values_str__(self) -> List[str]:
+        """String format for __values__.
 
         Used for displaying as part of a TypedList.
-
-        Args:
-            row (TiaItemModel): An `TiaItemModel`.
 
         Returns:
             List[str]: Formatted strings for the several items.
         """
-        return [str(entry) if entry != 0 else "" for entry in row.__values__]
+        return [str(entry) if entry != 0 else "" for entry in self.__values__]
 
     @property
     def __values__(self) -> List[Any]:
@@ -418,10 +415,10 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
         Returns:
             List[List[Any]]: Table representation of the class.
         """
+        if len(self.items) == 0:
+            return []
         try:
-            return [self.headers] + list(
-                map(self.item_type.__format_values__, self.items)  # type: ignore
-            )
+            return [self.headers] + [item.__values_str__ for item in self.items]  # type: ignore[attr-defined] # noqa: B950
         except AttributeError:
             return str(self.items)
 
