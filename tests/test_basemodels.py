@@ -32,7 +32,7 @@ class Person(TiaItemModel):
     @property
     def subtotal(self) -> float:
         """The parent subtotal."""
-        return super().subtotal
+        return self.salary
 
     @property
     def total(self) -> float:
@@ -65,6 +65,13 @@ def test_tia_item_model(some_person: Dict[str, Any]) -> None:
     assert person.__values_str__ == [
         person._format_value(value) for value in person.__values__
     ]
+    assert person.subtotal == 1000
+    assert person.tax == 190
+    assert person.total == 1190
+    person.update({"first_name": "updated"})
+    assert person.first_name == "updated"
+    with pytest.raises(AttributeError):
+        person.update({"no_attr": "value"})
 
 
 def test_typed_list_init(
@@ -164,6 +171,7 @@ def test_typed_list_str(some_person: Dict[str, Any]) -> None:
     city = TypedList[Person]()
     assert str(int_list) == str(int_list.items)
     assert str(city) == str([])
+    assert city.table == []
     city.append(person)
     assert all([person._format_value(value) in str(city) for value in person.values])
 
