@@ -154,7 +154,7 @@ class TiaItemModel(TiaBaseModel, ABC):
         """
 
     @property
-    @abstractmethod
+    # @abstractmethod
     def total(self) -> float:
         """The total of the item.
 
@@ -166,7 +166,7 @@ class TiaItemModel(TiaBaseModel, ABC):
         return self.subtotal + self.tax
 
     @property
-    @abstractmethod
+    # @abstractmethod
     def tax(self) -> float:
         """The tax of the item.
 
