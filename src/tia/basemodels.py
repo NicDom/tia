@@ -19,7 +19,7 @@ from collections.abc import MutableSequence
 
 import orjson
 import pydantic
-from babel.dates import format_date
+from babel.dates import format_date  # type: ignore[import]
 from pydantic import BaseConfig
 from pydantic import BaseModel
 from pydantic import Extra
@@ -182,7 +182,7 @@ class TiaItemModel(TiaBaseModel, ABC):
                 return value
             elif isinstance(value, float) or isinstance(value, int):
                 try:
-                    return str(value) + self.currency if value != 0 else ""
+                    return str(value) + self.currency if value != 0 else ""  # type: ignore # noqa: B950
                 except (AttributeError):
                     return str(value) if value != 0 else ""
             elif isinstance(value, datetime.date):
