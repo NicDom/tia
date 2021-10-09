@@ -42,9 +42,7 @@ def test_tia_item_model(some_person: Dict[str, str]) -> None:
     assert Person.__headers__() == ["ID", "first_name", "last_name"]
     assert person.__values__ == person.values
     assert person.__values__ == [value for value in person.dict().values()]
-    assert Person.__format_values__(person) == [
-        str(value) for value in person.__values__
-    ]
+    assert person.__values_str__ == [str(value) for value in person.__values__]
 
 
 def test_typed_list_init(faker: Any, some_person: Dict[str, str]) -> None:
@@ -98,9 +96,7 @@ def test_typed_list_properties(faker: Any, some_person: Dict[str, str]) -> None:
     city.append(other_person)
     assert city.dataframe == [item.values for item in city]
     assert city.headers == Person.__headers__()
-    assert city.table == [city.headers] + list(
-        map(city.item_type.__format_values__, city.items)
-    )
+    assert city.table == [city.headers] + [item.__values_str__ for item in city.items]
     int_list = TypedList[int](items=[1, 2, 3])
     assert int_list.dataframe == int_list.items
     assert int_list.table == str(int_list.items)
