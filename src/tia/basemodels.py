@@ -25,7 +25,6 @@ from pydantic import BaseConfig
 from pydantic import BaseModel
 from pydantic import Extra
 from pydantic import Field
-from pydantic.decorator import validate_arguments
 from pydantic.generics import GenericModel
 from pydantic.json import pydantic_encoder
 from tabulate import tabulate  # type: ignore
@@ -164,6 +163,7 @@ class TiaItemModel(TiaBaseModel, ABC):
         Returns:
             float: The total = subtotal + tax of the item.
         """
+        return self.subtotal + self.tax
 
     @property
     @abstractmethod
@@ -175,6 +175,7 @@ class TiaItemModel(TiaBaseModel, ABC):
         Returns:
             float: The tax of the item.
         """
+        return self.subtotal * self.vat / 100
 
     def _format_value(self, value: Any) -> str:
         """Private method for string formatting `__values__`.
@@ -593,7 +594,6 @@ class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
     #     """
     #     return v if isinstance(v, list) else [] if v is None else [v]
 
-    @validate_arguments
     def add_item(self, item: ItemTType) -> None:
         """Adds an item to the balance sheets.
 
@@ -626,14 +626,13 @@ class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
             self.items[index] = new_item
         elif isinstance(new_item, dict):
             self.items[index].update(new_item)
-        else:
+        else:  # pragma: no cover
             raise (
                 ValueError(
                     f"{new_item} needs to be a dict or a(n) {self.item_type.__name__}."
                 )
             )
 
-    @validate_arguments
     def delete_item(self, item: ItemTType) -> None:
         """Deletes an item.
 
