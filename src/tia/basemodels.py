@@ -22,6 +22,7 @@ import pydantic
 from pydantic import BaseConfig
 from pydantic import BaseModel
 from pydantic import Extra
+from pydantic import Field
 from pydantic.decorator import validate_arguments
 from pydantic.generics import GenericModel
 from pydantic.json import pydantic_encoder
@@ -129,6 +130,8 @@ class TiaItemModel(TiaBaseModel, ABC):
 
     Subclass of `TiaBaseModel`.
     """
+
+    vat: float = Field(19, lt=100, ge=0)
 
     @property
     @abstractmethod
@@ -571,7 +574,6 @@ class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
         """
         self.append(item)
 
-    @validate_arguments
     def edit_item(
         self,
         old_item: ItemTType,
@@ -584,12 +586,21 @@ class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
             new_item (Union[Dict[str, Union[str, float, datetime.date]], ItemTType]): Is
                 either a dictionary containing new values for for updating `old_item`,
                 or a "TiaModelItem" that replaces the old item.
+
+        Raises:
+            ValueError: if `new_item` is no dict or of type `ItemTType`.
         """
         index = self.items.index(old_item)
-        if isinstance(new_item, ItemTType):
+        if isinstance(new_item, self.item_type):
             self.items[index] = new_item
-        else:
+        elif isinstance(new_item, dict):
             self.items[index].update(new_item)
+        else:
+            raise (
+                ValueError(
+                    f"{new_item} needs to be a dict or a(n) {self.item_type.__name__}."
+                )
+            )
 
     @validate_arguments
     def delete_item(self, item: ItemTType) -> None:

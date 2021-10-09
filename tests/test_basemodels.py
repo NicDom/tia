@@ -42,7 +42,9 @@ def test_tia_item_model(some_person: Dict[str, str]) -> None:
     assert Person.__headers__() == ["ID", "first_name", "last_name"]
     assert person.__values__ == person.values
     assert person.__values__ == [value for value in person.dict().values()]
-    assert Person.__format_values__(person) == person.__values__
+    assert Person.__format_values__(person) == [
+        str(value) for value in person.__values__
+    ]
 
 
 def test_typed_list_init(faker: Any, some_person: Dict[str, str]) -> None:
@@ -82,8 +84,9 @@ def test_typed_list_type_check(some_person: Dict[str, str]) -> None:
 
 def test_typed_list_equal(some_person: Dict[str, str]) -> None:
     """It can be compared to `list`."""
-    assert TypedList[Person](items=some_person) == [some_person]
-    assert TypedList[Person](items=some_person) != [some_person, some_person]
+    person = Person(**some_person)
+    assert TypedList[Person](items=some_person) == [person]
+    assert TypedList[Person](items=some_person) != [some_person]
     assert TypedList[Person](items=some_person) != [1]
 
 
@@ -140,7 +143,7 @@ def test_typed_list_str(some_person: Dict[str, str]) -> None:
     assert str(int_list) == str(int_list.items)
     assert str(city) == str([])
     city.append(person)
-    assert all([value in str(city) for value in person.values])
+    assert all([str(value) in str(city) for value in person.values])
 
 
 def test_tiaconfigbasemodel() -> None:
