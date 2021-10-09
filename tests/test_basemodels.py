@@ -20,6 +20,21 @@ class Person(TiaItemModel):
     first_name: str
     last_name: str
 
+    @property
+    def subtotal(self) -> float:
+        """The parent subtotal."""
+        return super().subtotal
+
+    @property
+    def total(self) -> float:
+        """The  parent total."""
+        return super().total
+
+    @property
+    def tax(self) -> float:
+        """The parent tax."""
+        return super().tax
+
 
 def test_tia_item_model(some_person: Dict[str, str]) -> None:
     """It has dunder methods relevant for TypedList."""
