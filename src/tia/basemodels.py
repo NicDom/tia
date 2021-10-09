@@ -13,6 +13,7 @@ from typing import no_type_check
 
 import datetime
 import inspect
+import pathlib
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import MutableSequence
@@ -45,6 +46,8 @@ INVOICE_BASENAME = "invoice_"
 BS_BASENAME = "EUR_"
 
 SUPPORTED_LANGUAGES = ["english", "german"]
+
+ObjType = TypeVar("ObjType", bound=BaseModel)
 
 ItemType = TypeVar("ItemType")
 
@@ -83,7 +86,7 @@ def orjson_dumps(
     Returns:
         str: The json formatted string of the object.
     """
-    return orjson.dumps(obj, default=default).decode()
+    return orjson.dumps(obj, default=default).decode("utf-8")
 
 
 class TiaBaseConfig(BaseConfig):
@@ -111,6 +114,12 @@ class TiaBaseModel(BaseModel):
     `extra` = Extra.forbid
     `allow_population_by_field_name` = True
     """
+
+    @classmethod
+    def from_file(cls: Type[ObjType], filepath: Union[str, pathlib.Path]) -> ObjType:
+        """Same as `BaseModel.parse_file`, due to issue with unicode symbols."""
+        with open(filepath, "r") as f:
+            return cls.parse_raw(f.read())
 
     class Config(TiaBaseConfig):
         """The Config of `TiaBaseModel`."""
@@ -167,6 +176,30 @@ class TiaItemModel(TiaBaseModel, ABC):
             float: The tax of the item.
         """
 
+    def _format_value(self, value: Any) -> str:
+        """Private method for string formatting `__values__`.
+
+        Used in `__values_str__` to create list containing the desired string
+        formation of the elements of `__values__`.
+
+        Args:
+            value (Any): Value, whose string representation we want to create.
+
+        Returns:
+            str: String format of `value`.
+        """
+        if isinstance(value, str):
+            return value
+        elif isinstance(value, float) or isinstance(value, int):
+            try:
+                return str(value) + self.currency if value != 0 else ""  # type: ignore # noqa: B950
+            except (AttributeError):  # pragma: no cover
+                return str(value) if value != 0 else ""
+        elif isinstance(value, datetime.date):
+            return str(format_date(value, format="short", locale="en"))
+        else:
+            return str(value)
+
     @property
     def __values_str__(self) -> List[str]:
         """String format for __values__.
@@ -176,21 +209,7 @@ class TiaItemModel(TiaBaseModel, ABC):
         Returns:
             List[str]: Formatted strings for the several items.
         """
-
-        def _format_value(value: Any) -> str:
-            if isinstance(value, str):
-                return value
-            elif isinstance(value, float) or isinstance(value, int):
-                try:
-                    return str(value) + self.currency if value != 0 else ""  # type: ignore # noqa: B950
-                except (AttributeError):
-                    return str(value) if value != 0 else ""
-            elif isinstance(value, datetime.date):
-                return str(format_date(value, format="short", locale="en"))
-            else:
-                return str(value)
-
-        return list(map(_format_value, self.__values__))
+        return list(map(self._format_value, self.__values__))
 
     @property
     def __values__(self) -> List[Any]:
