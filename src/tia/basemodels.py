@@ -19,6 +19,7 @@ from collections.abc import MutableSequence
 
 import orjson
 import pydantic
+from babel.dates import format_date
 from pydantic import BaseConfig
 from pydantic import BaseModel
 from pydantic import Extra
@@ -175,7 +176,21 @@ class TiaItemModel(TiaBaseModel, ABC):
         Returns:
             List[str]: Formatted strings for the several items.
         """
-        return [str(entry) if entry != 0 else "" for entry in self.__values__]
+
+        def _format_value(value: Any) -> str:
+            if isinstance(value, str):
+                return value
+            elif isinstance(value, float) or isinstance(value, int):
+                try:
+                    return str(value) + self.currency if value != 0 else ""
+                except (AttributeError):
+                    return str(value) if value != 0 else ""
+            elif isinstance(value, datetime.date):
+                return str(format_date(value, format="short", locale="en"))
+            else:
+                return str(value)
+
+        return list(map(_format_value, self.__values__))
 
     @property
     def __values__(self) -> List[Any]:
