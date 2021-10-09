@@ -2,8 +2,12 @@
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
+
+from datetime import date
 
 import pytest
+from babel.dates import format_date  # type: ignore
 
 # from faker import Faker  # type: ignore
 from pydantic import ValidationError
@@ -12,6 +16,7 @@ from tia.basemodels import TiaBaseModel
 from tia.basemodels import TiaConfigBaseModel
 from tia.basemodels import TiaItemModel
 from tia.basemodels import TypedList
+from tia.utils import file2class
 
 
 class Person(TiaItemModel):
@@ -19,6 +24,10 @@ class Person(TiaItemModel):
 
     first_name: str
     last_name: str
+    salary: float
+    date_of_birth: date
+    currency: str = "€"
+    sibling: Optional["Person"] = None
 
     @property
     def subtotal(self) -> float:
@@ -36,20 +45,35 @@ class Person(TiaItemModel):
         return super().tax
 
 
-def test_tia_item_model(some_person: Dict[str, str]) -> None:
+Person.update_forward_refs()
+
+
+def test_tia_item_model(some_person: Dict[str, Any]) -> None:
     """It has dunder methods relevant for TypedList."""
     person = Person(**some_person)
-    assert Person.__headers__() == ["ID", "first_name", "last_name"]
+    attr_names = [key for key in person.dict()]
+    attr_names.remove("vat")
+    assert Person.__headers__() == ["ID"] + attr_names
     assert person.__values__ == person.values
     assert person.__values__ == [value for value in person.dict().values()]
-    assert person.__values_str__ == [str(value) for value in person.__values__]
+    actual = person._format_value(person.date_of_birth)
+    expected = format_date(person.date_of_birth, format="short", locale="en")
+    assert actual == expected
+    actual = person._format_value(person.salary)
+    expected = str(person.salary) + person.currency
+    assert actual == expected
+    assert person.__values_str__ == [
+        person._format_value(value) for value in person.__values__
+    ]
 
 
-def test_typed_list_init(faker: Any, some_person: Dict[str, str]) -> None:
+def test_typed_list_init(
+    faker: Any, some_person: Dict[str, Any], second_person: Dict[str, Any]
+) -> None:
     """It uses the right type for typechecks and behaves like a `list`."""
     person = Person(**some_person)
     city = TypedList[Person](items=person)
-    other_person = Person(first_name=faker.first_name(), last_name=faker.last_name())
+    other_person = Person(**second_person)
     city.append(other_person)
     assert city.item_type == Person
     assert person in city
@@ -63,7 +87,7 @@ def test_typed_list_init(faker: Any, some_person: Dict[str, str]) -> None:
     assert city.__eq__(person) == NotImplemented
 
 
-def test_typed_list_type_check(some_person: Dict[str, str]) -> None:
+def test_typed_list_type_check(some_person: Dict[str, Any]) -> None:
     """It checks the type before assignment, inserting, etc.
 
     Args:
@@ -80,19 +104,21 @@ def test_typed_list_type_check(some_person: Dict[str, str]) -> None:
     assert str(Person) in str(excinfo) and str(int) in str(excinfo)
 
 
-def test_typed_list_equal(some_person: Dict[str, str]) -> None:
+def test_typed_list_equal(some_person: Dict[str, Any]) -> None:
     """It can be compared to `list`."""
     person = Person(**some_person)
     assert TypedList[Person](items=some_person) == [person]
-    assert TypedList[Person](items=some_person) != [some_person]
+    assert TypedList[Person](items=some_person) != [some_person, some_person]
     assert TypedList[Person](items=some_person) != [1]
 
 
-def test_typed_list_properties(faker: Any, some_person: Dict[str, str]) -> None:
+def test_typed_list_properties(
+    faker: Any, some_person: Dict[str, Any], second_person: Dict[str, Any]
+) -> None:
     """It has dataframe and table properties."""
     person = Person(**some_person)
     city = TypedList[Person](items=person)
-    other_person = Person(first_name=faker.first_name(), last_name=faker.last_name())
+    other_person = Person(**second_person)
     city.append(other_person)
     assert city.dataframe == [item.values for item in city]
     assert city.headers == Person.__headers__()
@@ -102,7 +128,7 @@ def test_typed_list_properties(faker: Any, some_person: Dict[str, str]) -> None:
     assert int_list.table == str(int_list.items)
 
 
-def test_typed_list_inheritance(some_person: Dict[str, str]) -> None:
+def test_typed_list_inheritance(some_person: Dict[str, Any]) -> None:
     """Inheritance from `TypedList` does not break type check."""
     person = Person(**some_person)
 
@@ -127,7 +153,7 @@ def test_typed_list_inheritance(some_person: Dict[str, str]) -> None:
     assert person not in person_list
 
 
-def test_typed_list_str(some_person: Dict[str, str]) -> None:
+def test_typed_list_str(some_person: Dict[str, Any]) -> None:
     """String representation is different, if items are `TiaItemModel`.
 
     Args:
@@ -139,7 +165,7 @@ def test_typed_list_str(some_person: Dict[str, str]) -> None:
     assert str(int_list) == str(int_list.items)
     assert str(city) == str([])
     city.append(person)
-    assert all([str(value) in str(city) for value in person.values])
+    assert all([person._format_value(value) in str(city) for value in person.values])
 
 
 def test_tiaconfigbasemodel() -> None:
@@ -155,7 +181,7 @@ def test_tiaconfigbasemodel() -> None:
     assert "Language 'invalid' is not supported." in str(excinfo)
 
 
-def test_typed_list_json(fake_filesystem: Any, some_person: Dict[str, str]) -> None:
+def test_typed_list_json(fake_filesystem: Any, some_person: Dict[str, Any]) -> None:
     """It can be saved as json and loaded from json.
 
     Args:
@@ -182,4 +208,5 @@ def test_typed_list_json(fake_filesystem: Any, some_person: Dict[str, str]) -> N
     print(country.json())
     print(expected)
     assert expected == country
-    assert country == Country.parse_file("some.json")
+    assert country == file2class(Country, "some.json")
+    assert country == Country.from_file("some.json")
