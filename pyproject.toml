@@ -39,6 +39,7 @@ orjson = "^3.6.4"
 pyfakefs = "^4.5.1"
 Faker = "^9.2.0"
 schwifty = "^2021.10.0"
+Babel = "^2.9.1"
 
 
 [tool.poetry.dev-dependencies]
