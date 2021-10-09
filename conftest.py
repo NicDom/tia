@@ -1,4 +1,5 @@
 """conftest of TIA."""
+from typing import Any
 from typing import Dict
 
 import pathlib
@@ -21,9 +22,27 @@ def random_seed():
 
 
 @pytest.fixture
-def some_person(faker) -> Dict[str, str]:
-    """Returns dict some `Person`."""
-    return {"first_name": faker.first_name(), "last_name": faker.last_name()}
+def some_person(faker) -> Dict[str, Any]:
+    """Returns dict for some `Person`."""
+    return {
+        "first_name": faker.first_name(),
+        "last_name": faker.last_name(),
+        "salary": 1000,
+        "currency": "€",
+        "date_of_birth": faker.date_object(),
+    }
+
+
+@pytest.fixture
+def second_person(faker) -> Dict[str, Any]:
+    """Returns dict for some `Person`."""
+    return {
+        "first_name": faker.first_name(),
+        "last_name": faker.last_name(),
+        "salary": 1000,
+        "currency": "€",
+        "date_of_birth": faker.date_object(),
+    }
 
 
 @pytest.fixture
