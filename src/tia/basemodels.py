@@ -11,8 +11,10 @@ from typing import TypeVar
 from typing import Union
 from typing import no_type_check
 
+import datetime
 import inspect
 from abc import ABC
+from abc import abstractmethod
 from collections.abc import MutableSequence
 
 import orjson
@@ -20,6 +22,7 @@ import pydantic
 from pydantic import BaseConfig
 from pydantic import BaseModel
 from pydantic import Extra
+from pydantic.decorator import validate_arguments
 from pydantic.generics import GenericModel
 from pydantic.json import pydantic_encoder
 from tabulate import tabulate  # type: ignore
@@ -42,6 +45,8 @@ BS_BASENAME = "EUR_"
 SUPPORTED_LANGUAGES = ["english", "german"]
 
 ItemType = TypeVar("ItemType")
+
+ItemTType = TypeVar("ItemTType", bound="TiaItemModel")
 
 
 class PatchedModel(BaseModel):  # pragma: no cover
@@ -119,11 +124,44 @@ class TiaGenericModel(GenericModel):
         """
 
 
-class TiaItemModel(TiaBaseModel):
+class TiaItemModel(TiaBaseModel, ABC):
     """Baseclass for items in TIA.
 
     Subclass of `TiaBaseModel`.
     """
+
+    @property
+    @abstractmethod
+    def subtotal(self) -> float:
+        """The subtotal of the item.
+
+        Getter only. Setter is not defined.
+
+        Returns:
+            float: The subtotal of the item.
+        """
+
+    @property
+    @abstractmethod
+    def total(self) -> float:
+        """The total of the item.
+
+        Getter only. Setter is not defined.
+
+        Returns:
+            float: The total = subtotal + tax of the item.
+        """
+
+    @property
+    @abstractmethod
+    def tax(self) -> float:
+        """The tax of the item.
+
+        Getter only. Setter is not defined.
+
+        Returns:
+            float: The tax of the item.
+        """
 
     @classmethod
     def __format_values__(cls, row: "TiaItemModel") -> List[str]:
@@ -160,6 +198,23 @@ class TiaItemModel(TiaBaseModel):
             List[Any]: List containing the values of the item.
         """
         return self.__values__
+
+    def update(self, dictionary: Dict[str, Any]) -> None:
+        """Updates the item with the given `dictionary`.
+
+        Args:
+            dictionary (Dict[str, Any]): Dictionary containing update information for
+                the item. Keys need to be names of existing attributes of the object
+                `self`, `values` need to be valid values fot the attributes.
+
+        Raises:
+            AttributeError: if `key` is no attribute of `self`.
+        """
+        for key, value in dictionary.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise (AttributeError(f"{key} is no attribute of {type(self)}."))
 
     @classmethod
     def __headers__(cls) -> List[str]:
@@ -450,3 +505,99 @@ class CompanyAndClientABCBaseModel(BaseModel, ABC):
         validate_assignment = True
         extra = "forbid"
         allow_population_by_field_name = True
+
+
+class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
+    """Dataclass for the balance sheet/invoice."""
+
+    @property
+    def subtotal(self) -> float:
+        """The subtotal of the balance sheet/invoice.
+
+        Setter is not defined.
+
+        Returns:
+            float: The subtotal of the balance sheet/invoice (revenue + expenditures)
+        """
+        return sum(item.subtotal for item in self.items)
+
+    @property
+    def tax(self) -> float:
+        """The tax of the balance sheet/invoice.
+
+        Setter is not defined.
+
+        Returns:
+            float: The tax (revenue + expenditures)
+        """
+        return sum(item.subtotal * item.vat / 100 for item in self.items)
+
+    @property
+    def total(self) -> float:
+        """The total of the balance sheet/invoice.
+
+        Setter is not defined.
+
+        Returns:
+            float: The total (revenue + expenditures)
+        """
+        return self.subtotal + self.tax
+
+    # @pydantic.validator("items", check_fields=False)
+    # @classmethod
+    # def make_items_a_list(
+    #     cls, v: Optional[Union[ItemTType, List[ItemTType]]]
+    # ) -> List[ItemTType]:
+    #     """Makes items a list, if not isinstance(items, ItemTType).
+
+    #     Args:
+    #         v (Optional[Union[ItemTType, List[ItemTType]]]): The items
+
+    #     Returns:
+    #         List[ItemTType]: `items` if isinstance(items, ItemTTypes),
+    #             `[items]` else.
+    #     """
+    #     return v if isinstance(v, list) else [] if v is None else [v]
+
+    @validate_arguments
+    def add_item(self, item: ItemTType) -> None:
+        """Adds an item to the balance sheets.
+
+        Raises ValidationError, if `item` is no instance of
+        `ItemTType`.
+
+        Args:
+            item (ItemTType): The item to add to the sheet.
+        """
+        self.append(item)
+
+    @validate_arguments
+    def edit_item(
+        self,
+        old_item: ItemTType,
+        new_item: Union[Dict[str, Union[str, float, datetime.date]], ItemTType],
+    ) -> None:
+        """Adds an item to the balance sheet/invoice.
+
+        Args:
+            old_item (ItemTType): The item we want to edit.
+            new_item (Union[Dict[str, Union[str, float, datetime.date]], ItemTType]): Is
+                either a dictionary containing new values for for updating `old_item`,
+                or a "TiaModelItem" that replaces the old item.
+        """
+        index = self.items.index(old_item)
+        if isinstance(new_item, ItemTType):
+            self.items[index] = new_item
+        else:
+            self.items[index].update(new_item)
+
+    @validate_arguments
+    def delete_item(self, item: ItemTType) -> None:
+        """Deletes an item.
+
+        Deletes the given item, if it is one of `self.items`.
+
+        Args:
+            item (ItemTType): The item to be deleted.
+        """
+        self.remove(item)
