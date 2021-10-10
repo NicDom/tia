@@ -65,53 +65,6 @@ def acc_config() -> AccountingConfiguration:
     return AccountingConfiguration()
 
 
-@pytest.fixture
-def ca_items(
-    acc_item_1: Dict[str, Any], acc_item_2: Dict[str, Any]
-) -> List[AccountingItem]:
-    """List of some `AccountingItems`.
-
-    Args:
-        acc_item_1 (Dict[str, Any]): Dict for some`AccountingItem`
-        acc_item_2 (Dict[str, Any]): Dict for some `AccountingItem`
-
-    Returns:
-        List[AccountingItem]: List of `AccountingItem`.
-    """
-    return [AccountingItem(**acc_item_1), AccountingItem(**acc_item_2)]
-
-
-@pytest.fixture
-def empty_ca(acc_config: AccountingConfiguration) -> CashAccounting:
-    """`CashAccounting` without any items.
-
-    Args:
-        acc_config (AccountingConfiguration): The configuration.
-
-    Returns:
-        CashAccounting: An empty `CashAccounting`.
-    """
-    return CashAccounting(
-        config=acc_config,
-    )
-
-
-@pytest.fixture
-def some_ca(
-    acc_config: AccountingConfiguration, ca_items: List[AccountingItem]
-) -> CashAccounting:
-    """Some `CashAccounting` with items.
-
-    Args:
-        acc_config (AccountingConfiguration): The configuration.
-        ca_items (List[AccountingItem]): Some CA items.
-
-    Returns:
-        CashAccounting: The CA.
-    """
-    return CashAccounting(config=acc_config, items=ca_items)
-
-
 ######################################
 #    AccountingConfiguration
 ######################################

@@ -1,49 +1,22 @@
 """Testssuite of the invoices-module."""
 from typing import Any
 from typing import Dict
-from typing import List
-from typing import Union
 
 import datetime
 
 import pytest
-
-# from faker import Faker
 from pydantic import ValidationError
 
 from tia.balances import AccountingItem
 from tia.basemodels import TypedList
-
-# from tia.balances import AccountingItem
-from tia.client import Client
-from tia.company import Company
-
-# from tia.exceptions import TaxValueError
-# from tia.exceptions import UnknownInvoiceItemError
-# from tia.invoices import Invoice
-# from tia.invoices import InvoiceConfiguration
 from tia.invoices import Invoice
 from tia.invoices import InvoiceConfiguration
 from tia.invoices import InvoiceItem
 from tia.invoices import InvoiceMetadata
 
-# import json
-# import pathlib
-
-
-# from tabulate import tabulate
-
-
-# from tia.invoices import InvoiceMetadata
-
-# fake = Faker()
-
-ItemDict = Dict[str, Union[str, float]]
-MetaDict = Dict[str, Union[str, float, datetime.date]]
-
 
 @pytest.fixture
-def inv_metadata_1() -> MetaDict:
+def inv_metadata_1() -> Dict[str, Any]:
     """Returns a dict for some `InvoiceMetadata`."""
     return {
         "invoicenumber": "order",
@@ -67,70 +40,6 @@ def inv_config_1() -> Dict[str, Any]:
         "currency_symbol": "$",
         "currency_code": "GMD",
     }
-
-
-@pytest.fixture
-def list_of_invoiceitems(
-    full_invoiceitem: Dict[str, Any], other_invoiceitem: Dict[str, Any]
-) -> List[InvoiceItem]:
-    """Returns a list of invoiceitems.
-
-    Args:
-        full_invoiceitem (Dict[str, Any]): [description]
-        other_invoiceitem (Dict[str, Any]): [description]
-
-    Returns:
-        List[InvoiceItem]: A list of `InvoiceItems`.
-    """
-    return [InvoiceItem(**full_invoiceitem), InvoiceItem(**other_invoiceitem)]
-
-
-@pytest.fixture
-def full_invoice_data(
-    some_client: Dict[str, Any],
-    company_data: Dict[str, Any],
-    list_of_invoiceitems: List[InvoiceItem],
-    faker: Any,
-) -> Dict[str, Any]:
-    """Returns data for an `Invoice`.
-
-    Args:
-        some_client (Dict[str, Any]): Data for some `Client`
-        company_data (Dict[str, Any]): Data for some 'Company'
-        list_of_invoiceitems (List[InvoiceItem]): List of `InvoiceItem`
-        faker (Any): faker object
-
-    Returns:
-        Dict[str, Any]: Data for an `Invoice`.
-    """
-    return {
-        "invoicenumber": "2021001",
-        "config": InvoiceConfiguration(),
-        "client": Client(**some_client),
-        "company": Company(**company_data),
-        "items": list_of_invoiceitems,
-        "payed_on": faker.date_object(),
-    }
-
-
-@pytest.fixture
-def empty_invoice_data(full_invoice_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Returns data for an `Invoice` without items.
-
-    Args:
-        full_invoice_data (Dict[str, Any]): Data for an invoice with items.
-
-    Returns:
-        Dict[str, Any]: Data for an empty `Invoice`.
-    """
-    full_invoice_data.pop("items")
-    return full_invoice_data
-
-
-@pytest.fixture
-def some_invoice(full_invoice_data: Dict[str, Any]) -> Invoice:
-    """Returns some `Invoice`."""
-    return Invoice(**full_invoice_data)
 
 
 # #################################
@@ -194,27 +103,27 @@ def test_invoiceitem_properties(full_invoiceitem: Dict[str, Any]) -> None:
 # #################################
 
 
-def test_invoicemetadata_init(inv_metadata_1: MetaDict) -> None:
+def test_invoicemetadata_init(inv_metadata_1: Dict[str, Any]) -> None:
     """It sets the attributes to the given values."""
     meta = InvoiceMetadata(**inv_metadata_1)
     assert meta.payed_on == inv_metadata_1["payed_on"]
     assert meta.dict() == inv_metadata_1
 
 
-def test_invoicemetadata_init_not_payed(inv_metadata_1: MetaDict) -> None:
+def test_invoicemetadata_init_not_payed(inv_metadata_1: Dict[str, Any]) -> None:
     """Default value for `payed_on` is None."""
     inv_metadata_1.pop("payed_on")
     meta = InvoiceMetadata(**inv_metadata_1)
     assert meta.payed_on is None
 
 
-def test_invoicemetadata_properties(inv_metadata_1: MetaDict) -> None:
+def test_invoicemetadata_properties(inv_metadata_1: Dict[str, Any]) -> None:
     """Subtotal == `value`."""
     meta = InvoiceMetadata(**inv_metadata_1)
     assert meta.subtotal == meta.value
 
 
-def test_invoicemetadata_typedlist_related(inv_metadata_1: MetaDict) -> None:
+def test_invoicemetadata_typedlist_related(inv_metadata_1: Dict[str, Any]) -> None:
     """`__headers__` and `__values__` are defined as expected."""
     meta = InvoiceMetadata(**inv_metadata_1)
     assert InvoiceMetadata.__headers__() == [
