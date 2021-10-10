@@ -91,7 +91,7 @@ class InvoiceConfiguration(TiaConfigBaseModel):
 
     # language: str = "english"
     date: datetime.date = datetime.date.today()
-    vat: float = Field(default=0, ge=0, lt=100)
+    vat: float = Field(default=0.0, ge=0, lt=100)
     deadline: datetime.timedelta = datetime.timedelta(days=30)
     paymentterms: str = ""
     invoicestyle: str = "classic"

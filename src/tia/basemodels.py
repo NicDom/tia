@@ -140,7 +140,7 @@ class TiaItemModel(TiaBaseModel, ABC):
     Subclass of `TiaBaseModel`.
     """
 
-    vat: float = Field(19, lt=100, ge=0)
+    vat: float = Field(19.0, lt=100, ge=0)
 
     @property
     @abstractmethod
@@ -550,6 +550,12 @@ class CompanyAndClientABCBaseModel(BaseModel, ABC):
 
 class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
     """Dataclass for the balance sheet/invoice."""
+
+    @classmethod
+    def from_file(cls: Type[ObjType], filepath: Union[str, pathlib.Path]) -> ObjType:
+        """Same as `BaseModel.parse_file`, due to issue with unicode symbols."""
+        with open(filepath, "r") as f:
+            return cls.parse_raw(f.read())
 
     @property
     def subtotal(self) -> float:
