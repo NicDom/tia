@@ -50,9 +50,9 @@ def full_invoiceitem(faker):
     """Returns a dict for an `InvoiceItem`."""
     full_item_dict = {
         "service": "Some Material",
-        "qty": 5,
+        "qty": 5.0,
         "unit_price": 12.3,
-        "vat": 19,
+        "vat": 19.0,
         "description": faker.sentence(nb_words=5),
     }
     return full_item_dict
@@ -63,9 +63,9 @@ def other_invoiceitem(faker):
     """Returns a dict for an `InvoiceItem` with `vat` = 0."""
     full_item_dict = {
         "service": faker.sentence(nb_words=2),
-        "qty": 1,
-        "unit_price": 1,
-        "vat": 0,
+        "qty": 1.0,
+        "unit_price": 1.0,
+        "vat": 0.0,
         "description": faker.sentence(nb_words=5),
     }
     return full_item_dict

@@ -49,7 +49,7 @@ def inv_metadata_1() -> MetaDict:
         "invoicenumber": "order",
         "value": 6.223030212187535,
         "due_to": datetime.date(2021, 9, 1),
-        "vat": 2,
+        "vat": 2.0,
         "payed_on": datetime.date(2021, 9, 10),
     }
 
@@ -60,7 +60,7 @@ def inv_config_1() -> Dict[str, Any]:
     return {
         "language": "english",
         "date": datetime.date(2021, 9, 13),
-        "vat": 4,
+        "vat": 4.0,
         "deadline": datetime.timedelta(days=10),
         "paymentterms": "my",
         "invoicestyle": "classic",
@@ -369,3 +369,14 @@ def test_invoice_str_representation(some_invoice: Invoice) -> None:
     ]
     assert all([isinstance(representation, str) for representation in representations])
     assert invoice.items_str == invoice.__str__()
+
+
+def test_invoice_save_and_load(fake_filesystem: Any, some_invoice: Invoice) -> None:
+    """It can be saved to json files and created by data given in json files."""
+    filename = "invoice.json"
+    with open(filename, "w") as f:
+        f.write(some_invoice.json())
+    with open(filename, "r") as f:
+        invoice = Invoice.parse_raw(f.read())
+    assert invoice.dict() == some_invoice.dict()
+    assert Invoice.from_file(filename).dict() == some_invoice.dict()
