@@ -108,64 +108,17 @@ def acc_item_2(faker) -> Dict[str, Any]:
 def some_client():
     """Returns a dict for a `Client`."""
     client_option_1 = {
-        "clientref": "cost",
-        "clientname": "Kristen Walker",
-        "clientstreet": "3363 Hannah Plain",
-        "clientplz": "89620",
-        "clientcity": "Port Peter",
-        "clientcountry": "United States",
-        "clientemail": "system@hotmail.com",
-        "clientinvoicemail": "page@hotmail.com",
-        "clientremindermail": "speech@hotmail.com",
+        "ref": "cost",
+        "name": "Kristen Walker",
+        "street": "3363 Hannah Plain",
+        "plz": "89620",
+        "city": "Port Peter",
+        "country": "United States",
+        "email": "system@hotmail.com",
+        "invoicemail": "page@hotmail.com",
+        "remindermail": "speech@hotmail.com",
     }
     return client_option_1
-
-
-@pytest.fixture
-def some_client_no_invoicemail():
-    """Returns a dict for some `Client` without an `invoicemail`."""
-    client_data = {
-        "clientref": "cost",
-        "clientname": "Kristen Walker",
-        "clientstreet": "3363 Hannah Plain",
-        "clientplz": "89620",
-        "clientcity": "Port Peter",
-        "clientcountry": "United States",
-        "clientemail": "system@hotmail.com",
-        "clientremindermail": "speech@hotmail.com",
-    }
-    return client_data
-
-
-@pytest.fixture
-def some_client_no_remindermail():
-    """Returns a dict for some `Client` without an `remindermail`."""
-    client_data = {
-        "clientref": "cost",
-        "clientname": "Kristen Walker",
-        "clientstreet": "3363 Hannah Plain",
-        "clientplz": "89620",
-        "clientcity": "Port Peter",
-        "clientcountry": "United States",
-        "clientemail": "system@hotmail.com",
-        "clientinvoicemail": "page@hotmail.com",
-    }
-    return client_data
-
-
-@pytest.fixture
-def some_client_only_mail():
-    """Returns a dict for some `Client` without `invoicemail` or `remindermail`."""
-    client_data = {
-        "clientref": "cost",
-        "clientname": "Kristen Walker",
-        "clientstreet": "3363 Hannah Plain",
-        "clientplz": "89620",
-        "clientcity": "Port Peter",
-        "clientcountry": "United States",
-        "clientemail": "system@hotmail.com",
-    }
-    return client_data
 
 
 @pytest.fixture

@@ -15,30 +15,28 @@ def test_client_init(some_client: Dict[str, str]) -> None:
         some_client (Dict[str, str]): Data for an example `Client`.
     """
     client = Client(**some_client)
-    assert client.dict(by_alias=True) == some_client
+    assert client.dict() == some_client
 
 
-def test_client_init_no_invoicemail(some_client_no_invoicemail: Dict[str, str]) -> None:
+def test_client_init_no_invoicemail(some_client: Dict[str, str]) -> None:
     """It sets `invoicemail` to `email`, if no `invoicemail` is given.
 
     Args:
-        some_client_no_invoicemail (Dict[str, str]): Data for an example client
-            (without `invoicemail` given).
+        some_client (Dict[str, str]): Data for an example client
     """
-    client = Client(**some_client_no_invoicemail)
+    some_client.pop("invoicemail")
+    client = Client(**some_client)
     assert client.invoicemail == client.email
 
 
-def test_client_init_no_remindermail(
-    some_client_no_remindermail: Dict[str, str]
-) -> None:
+def test_client_init_no_remindermail(some_client: Dict[str, str]) -> None:
     """It sets `remindermail` to `email`, if no `remindermail` is given.
 
     Args:
-        some_client_no_remindermail (Dict[str, str]): Data for an example client
-            (without `remindermail` given).
+        some_client (Dict[str, str]): Data for an example client
     """
-    client = Client(**some_client_no_remindermail)
+    some_client.pop("remindermail")
+    client = Client(**some_client)
     assert client.remindermail == client.email
 
 
