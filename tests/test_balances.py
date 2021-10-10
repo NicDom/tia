@@ -55,16 +55,6 @@ def check_invalid_assignments() -> Callable[
     return inner
 
 
-@pytest.fixture
-def acc_config() -> AccountingConfiguration:
-    """Some `AccountingConfiguration`.
-
-    Returns:
-        AccountingConfiguration: Some `AccountingConfiguration`.
-    """
-    return AccountingConfiguration()
-
-
 ######################################
 #    AccountingConfiguration
 ######################################
