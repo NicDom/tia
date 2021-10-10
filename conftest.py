@@ -140,7 +140,7 @@ def company_data():
         "companyplz": "71974",
         "companycity": "Valerieshire",
         "companycountry": "United States",
-        "companylogo": "choice",
+        "companylogo": "logo",
         "companyphone": "001-044-850-0363",
         "companyemail": "increase@hotmail.com",
         "validate_account_information": True,
@@ -230,6 +230,16 @@ def ca_items(
         List[AccountingItem]: List of `AccountingItem`.
     """
     return [AccountingItem(**acc_item_1), AccountingItem(**acc_item_2)]
+
+
+@pytest.fixture
+def acc_config() -> AccountingConfiguration:
+    """Some `AccountingConfiguration`.
+
+    Returns:
+        AccountingConfiguration: Some `AccountingConfiguration`.
+    """
+    return AccountingConfiguration()
 
 
 @pytest.fixture
