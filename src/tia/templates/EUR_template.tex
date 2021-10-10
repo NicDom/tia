@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{babel}
+\usepackage{translator}
+\usepackage[table]{xcolor}
+\usepackage{color, colortbl}
+\usepackage{rotating}
+%\usepackage{tabularx}
+\usepackage{booktabs}
+%-------------------------------------------------------------------------------
+%                required dictionaries
+%-------------------------------------------------------------------------------
+%
+%
+%
+%-------------------------------------------------------------------------------
+%                required colors, and columntypes
+%-------------------------------------------------------------------------------
+
+% colors
+\definecolor{lightgreen}{rgb}{0.58,0.9,0.50}
+\definecolor{Gray}{gray}{0.9}
+
+% columntypes
+\newcolumntype{g}{>{\columncolor{Gray}}r}
+
+\begin{document}
+\begin{sidewaystable}
+	\begin{tabular}{|l|l|l|r|r|g|r|r|g|r|g| }
+		\cline{4-11}
+		\multicolumn{3}{l}{}&\multicolumn{3}{|l}{\cellcolor{lightgreen}\textbf{\translate{Betriebseinnahmen}}}&\multicolumn{3}{|l}{\cellcolor{lightgreen}\textbf{\translate{Betriebsausgaben}}}&\multicolumn{2}{|l|}{\cellcolor{lightgreen}\textbf{\translate{Steuern}}}\\
+		\midrule
+		\textbf{\translate{Beleg-Nr.}} & \textbf{\translate{Datum}} & \textbf{\translate{Transaktion}} & \textbf{\translate{Netto}} & \textbf{\translate{USt.}} & \textbf{\translate{Gesamt}} & \translate{Netto} & \textbf{\translate{USt.}} & \textbf{\translate{Gesamt}} & \textbf{\translate{Bezahlte VSt.}}  & \textbf{\translate{USt.-Schuld}}\\
+		\midrule
+		$items
+		\bottomrule
+	\end{tabular}
+\end{sidewaystable}
+\end{document}

@@ -1,0 +1,48 @@
+%%!TEX encoding = UTF-8 Unicode
+%% Copyright 2014 Dacteev
+
+\documentclass[$language]{invoice}
+\invoicestyle{$invoicestyle}
+% Use blindtext package for generate payment terms text,
+% remove in real invoice.
+\usepackage[pangram]{blindtext}
+\usepackage{invoice-dictionary-$language}
+
+$invdate
+\deadline{$deadline}
+
+\companyname{$companyname}
+\companyaddress{$companystreet}{$companyplz}{$companycity}{}{$companycountry}
+\companyphone{$companyphone}
+%\companyfax{+33 5 00 00 00 00}
+\companyemail{$companyemail}
+%\companywebsite{www.dacteev.com}
+\companylogo{$companylogo}
+\companybank{$companybank}
+\companyiban{$companyiban}
+\companybic{$companybic}
+\companytaxnumber{$companytaxnumber}
+
+\currency{$currency_code}{$currency_symbol}
+\vat{$vat}
+
+\paymentterms{$paymentterms}
+
+\invoicenumber{$invoicenumber}
+
+\clientref{$clientref}
+\clientname{$clientname}
+\clientaddress{$clientstreet}{$clientplz}{$clientcity}{}{$clientcountry}
+%\clientphone{+1 415-522-1438}
+%\clientemail{john.smith@acme.com}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                 ITEMS                  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$items
+
+\begin{document}
+    \makeinvoice
+\end{document}
