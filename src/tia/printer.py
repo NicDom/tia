@@ -11,8 +11,6 @@ import pathlib
 from string import Template
 
 from babel.dates import format_date  # type: ignore[import]
-from pydantic.types import DirectoryPath
-from pydantic.types import FilePath
 
 from tia.balances import CashAccounting
 from tia.basemodels import BS_BASENAME
@@ -56,13 +54,13 @@ class Printer(TiaBaseModel):
     Creates outputs for `CashAccounting` and `Invoice`.
 
     Args:
-        pdf_invoice_dir (DirectoryPath): Directory, where invoice pdf is put.
-        pdf_eur_dir (DirectoryPath): Directory the cash accounting pdf is put.
+        pdf_invoice_dir (pathlib.Path): Directory, where invoice pdf is put.
+        pdf_eur_dir (pathlib.Path): Directory the cash accounting pdf is put.
         mode (PMode, optional): File format for output. Defaults to PMode.latex.
     """
 
-    pdf_invoice_dir: DirectoryPath
-    pdf_eur_dir: DirectoryPath
+    pdf_invoice_dir: pathlib.Path
+    pdf_eur_dir: pathlib.Path
     mode: PMode = PMode.latex
 
     # class Config:
@@ -124,7 +122,7 @@ class Printer(TiaBaseModel):
     def bs_pdf(
         self,
         bs: CashAccounting,
-        pdf_dir: DirectoryPath,
+        pdf_dir: pathlib.Path,
         template_filename: str = TEX_TEMPLATE_BS,
         year: Optional[int] = datetime.date.today().year,
     ) -> pathlib.Path:
@@ -135,7 +133,7 @@ class Printer(TiaBaseModel):
 
         Args:
             bs (CashAccounting): The CashAccounting.
-            pdf_dir (DirectoryPath): The directory the pdf is put.
+            pdf_dir (pathlib.Path): The directory the pdf is put.
             template_filename (str): Filename for the template to be used.
                 Defaults to TEX_TEMPLATE_BS.
             year (int, optional): Year the balance sheet refers to.
@@ -219,7 +217,7 @@ class Printer(TiaBaseModel):
         Returns:
             str: The tex content.
         """
-        template_path: FilePath = TemplateDirs.invoice.value / template_filename
+        template_path: pathlib.Path = TemplateDirs.invoice.value / template_filename
         # if not template_path.is_file():
         #     raise (ValueError(f"The template {template_path} does not exist."))
         with open(template_path) as f:
@@ -232,7 +230,7 @@ class Printer(TiaBaseModel):
     def invoice_pdf(
         self,
         invoice: Invoice,
-        pdf_dir: DirectoryPath,
+        pdf_dir: pathlib.Path,
         template_filename: str = TEX_TEMPLATE_INV,
     ) -> pathlib.Path:
         """Creates the pdf file for the invoice at returns its path.
@@ -242,7 +240,7 @@ class Printer(TiaBaseModel):
 
         Args:
             invoice (Invoice): The invoice.
-            pdf_dir (DirectoryPath): The directory the pdf is put.
+            pdf_dir (pathlib.Path): The directory the pdf is put.
             template_filename (str): Filename for the template to be used.
                 Defaults to TEX_TEMPLATE_INV.
 
@@ -272,11 +270,11 @@ class Printer(TiaBaseModel):
         os.remove(filepath)
         return pathlib.Path(pdf_dir) / f"{name}.pdf"
 
-    def delete_aux_files(self, dir: DirectoryPath) -> None:
+    def delete_aux_files(self, dir: pathlib.Path) -> None:
         """Deletes the aux files in `dir`.
 
         Args:
-            dir (DirectoryPath): The directory we want to remove the aux-files from.
+            dir (pathlib.Path): The directory we want to remove the aux-files from.
         """
         dir = pathlib.Path(dir)
         files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
