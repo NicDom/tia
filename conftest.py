@@ -122,7 +122,7 @@ def some_client():
 
 
 @pytest.fixture
-def some_company_validate_account():
+def company_data():
     """Returns a dict for some `Company` (`account_validation=True`)."""
     company_option_1 = {
         "companyname": "Craig, Smith and Ford",
