@@ -70,7 +70,7 @@ class Printer(TiaBaseModel):
     #    Print CashAccounting
     ################################
 
-    def _bs_row_to_tex(self, row: Union[str, List[str]]) -> str:
+    def _ca_row_to_tex(self, row: Union[str, List[str]]) -> str:
         """Tex content for a row of the CashAccounting.
 
         Args:
@@ -81,24 +81,24 @@ class Printer(TiaBaseModel):
         """
         return " & ".join(row)
 
-    def bs_items_tex(self, bs: CashAccounting) -> str:
+    def ca_items_tex(self, cash_acc: CashAccounting) -> str:
         """Tex format for all items of the CashAccounting.
 
         Args:
-            bs (CashAccounting): The balance sheet.
+            cash_acc (CashAccounting): The balance sheet.
 
         Returns:
             str: The tex content for all balance sheet items.
         """
         return (
             " \\\\\n\t\t\\hline\n\t\t".join(
-                self._bs_row_to_tex(row) for row in bs.table
+                self._ca_row_to_tex(row) for row in cash_acc.table
             )
             + "\\\\"
         )
 
-    def bs_tex(
-        self, bs: CashAccounting, template_filename: str = TEX_TEMPLATE_BS
+    def ca_tex(
+        self, cash_acc: CashAccounting, template_filename: str = TEX_TEMPLATE_BS
     ) -> str:
         """The full tex content of the CashAccounting.
 
@@ -106,7 +106,7 @@ class Printer(TiaBaseModel):
         Replacement is done via `string.Template`.
 
         Args:
-            bs (CashAccounting): The balance sheet.
+            cash_acc (CashAccounting): The balance sheet.
             template_filename (str): Filename of the template to use.
                 Defaults to TEX_TEMPLATE_BS.
 
@@ -116,12 +116,12 @@ class Printer(TiaBaseModel):
         template_path = TemplateDirs.balance_sheet.value / template_filename
         with open(template_path) as f:
             template = f.read()
-        content = Template(template).safe_substitute(items=self.bs_items_tex(bs))
+        content = Template(template).safe_substitute(items=self.ca_items_tex(cash_acc))
         return content
 
-    def bs_pdf(
+    def ca_pdf(
         self,
-        bs: CashAccounting,
+        cash_acc: CashAccounting,
         pdf_dir: pathlib.Path,
         template_filename: str = TEX_TEMPLATE_BS,
         year: Optional[int] = datetime.date.today().year,
@@ -132,7 +132,7 @@ class Printer(TiaBaseModel):
         PDF is created via latexmk.
 
         Args:
-            bs (CashAccounting): The CashAccounting.
+            cash_acc (CashAccounting): The CashAccounting.
             pdf_dir (pathlib.Path): The directory the pdf is put.
             template_filename (str): Filename for the template to be used.
                 Defaults to TEX_TEMPLATE_BS.
@@ -145,7 +145,7 @@ class Printer(TiaBaseModel):
         name = f"{BS_BASENAME}{year}"
         path = pathlib.Path(__file__).resolve().parent
         with open(path / f"{name}.tex", "wb") as f:
-            f.write(self.bs_tex(bs, template_filename).encode("utf-8"))
+            f.write(self.ca_tex(cash_acc, template_filename).encode("utf-8"))
             aux_dir = PARENT_DIR / ".aux_files" / f"{name}"
             command = " ".join(
                 [
@@ -177,13 +177,13 @@ class Printer(TiaBaseModel):
         Returns:
             str: The tex content for all invoiceitems.
         """
-        result = ""
-        for item in invoice.items:
-            values = item.values
-            result += (
-                "\\invoiceitem" + "".join([f"{{{value}}}" for value in values]) + "\n"
-            )
-        return result
+        item_template = "\\invoiceitem{$service}{$qty}{$unit_price}{$vat}{$description}"
+        return "\n".join(
+            [
+                Template(item_template).safe_substitute(item.dict())
+                for item in invoice.items
+            ]
+        )
 
     def _invoice_substitution_dict(self, invoice: Invoice) -> Dict[str, str]:
         config: InvoiceConfiguration = invoice.config
