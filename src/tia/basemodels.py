@@ -234,13 +234,16 @@ class TiaItemModel(TiaBaseModel, ABC):
         """
         return self.__values__
 
-    def update(self, dictionary: Dict[str, Any]) -> None:
+    def update(self, dictionary: Dict[str, Any]) -> "TiaItemModel":
         """Updates the item with the given `dictionary`.
 
         Args:
             dictionary (Dict[str, Any]): Dictionary containing update information for
                 the item. Keys need to be names of existing attributes of the object
                 `self`, `values` need to be valid values fot the attributes.
+
+        Returns:
+            TiaItemModel: Updated `self`.
 
         Raises:
             AttributeError: if `key` is no attribute of `self`.
@@ -250,6 +253,7 @@ class TiaItemModel(TiaBaseModel, ABC):
                 setattr(self, key, value)
             else:
                 raise (AttributeError(f"{key} is no attribute of {type(self)}."))
+        return self
 
     @classmethod
     def __headers__(cls) -> List[str]:
@@ -297,11 +301,11 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
         """
         return iter(self.items)
 
-    def check(self, v: ItemType) -> ItemType:
+    def check(self, v: Any) -> ItemType:
         """Validates `v`.
 
         Args:
-            v (ItemType): The item to validate.
+            v (Any): The item to validate.
 
         Returns:
             ItemType: `v`
@@ -309,6 +313,8 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
         Raises:
             TypeError: if `v` is no instance of `ItemType`.
         """
+        # if isinstance(v, dict):
+        #     v = self.item_type(**v)
         if not isinstance(v, self.item_type):
             raise (
                 TypeError(
@@ -623,9 +629,9 @@ class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
         """
         index = self.items.index(old_item)
         if isinstance(new_item, self.item_type):
-            self.items[index] = new_item
+            self.items[index] = self.check(new_item)
         elif isinstance(new_item, dict):
-            self.items[index].update(new_item)
+            self.check(self.items[index].update(new_item))
         else:  # pragma: no cover
             raise (
                 ValueError(
