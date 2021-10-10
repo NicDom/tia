@@ -1,6 +1,5 @@
 """Module for Invoices."""
 from typing import Any
-from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -9,7 +8,6 @@ from typing import Union
 
 import datetime
 
-import pydantic
 from pydantic import Field
 from tabulate import tabulate  # type: ignore
 
@@ -19,7 +17,6 @@ from tia.basemodels import TiaItemModel
 from tia.basemodels import TiaSheetModel
 from tia.client import Client
 from tia.company import Company
-from tia.exceptions import TaxValueError
 
 
 class InvDict(TypedDict):
@@ -70,31 +67,6 @@ class InvoiceMetadata(TiaItemModel):
         """__values__ for representing a `TypedList` of `InvoiceMetadata`."""
         return [getattr(self, attr) for attr in InvoiceMetadata.__headers__()]
 
-    @pydantic.validator("tax")
-    @classmethod
-    def tax_is_smaller_than_half_total(cls, v: float, values: Dict[str, Any]) -> float:
-        """Checks if the tax is smaller than half of the total (vat >=100 %%).
-
-        Args:
-            v (float): The value for tax
-            values (Dict[str, Any]): All to the class given values.
-
-        Returns:
-            float: The tax.
-
-        Raises:
-            TaxValueError: If tax is greater or equal to half of total.
-        """
-        if v >= 0.5 * values["total"]:
-            raise (
-                TaxValueError(
-                    v,
-                    f"The value for tax is {v} but it must be smaller than"
-                    f" {values['total'] * 0.5}",
-                )
-            )
-        return v
-
 
 class InvoiceConfiguration(TiaConfigBaseModel):
     """Dataclass that contains the default configurations for a new invoice.
@@ -143,7 +115,7 @@ class InvoiceItem(TiaItemModel):
     service: str
     qty: float = Field(..., gt=0)
     unit_price: float = Field(..., gt=0)
-    vat: float = Field(default=0, ge=0, lt=100)
+    vat: float = Field(default=99.99, ge=0, lt=100)
     description: Optional[str] = ""
 
     @property
@@ -180,6 +152,23 @@ class Invoice(TiaSheetModel[InvoiceItem]):
     items: List[InvoiceItem] = []
     payed_on: Optional[datetime.date] = None
 
+    def check(self, v: InvoiceItem) -> InvoiceItem:
+        """Validates added items.
+
+        Overrides `TypedList.check`. Checks that `v` is an instance of
+        `InvoiceItem` and sets items VAT to invoices VAT, if items VAT is None.
+
+        Args:
+            v (InvoiceItem): [description]
+
+        Returns:
+            InvoiceItem: [description]
+        """
+        v = super().check(v)
+        if v.vat == 99.99:
+            v.vat = self.config.vat
+        return v
+
     @property
     def due_to(self) -> datetime.date:
         """Getter (no setter defined) to get the due date of the invoice.
@@ -202,9 +191,9 @@ class Invoice(TiaSheetModel[InvoiceItem]):
         """
         return InvoiceMetadata(
             invoicenumber=self.invoicenumber,
-            total=self.total,
+            value=self.total,
             due_to=self.due_to,
-            tax=self.tax,
+            vat=self.tax / self.subtotal * 100,
             payed_on=self.payed_on,
         )
 
@@ -228,7 +217,7 @@ class Invoice(TiaSheetModel[InvoiceItem]):
         if self.payed_on is not None:
             return AccountingItem(
                 description=f"Invoice no. {self.invoicenumber}",
-                subtotal=self.total,
+                value=self.total,
                 vat=self.tax / self.subtotal * 100,
                 currency=self.config.currency_symbol,
                 date=self.payed_on,
