@@ -1,6 +1,7 @@
 """Testssuite of the invoices-module."""
 from typing import Any
 from typing import Dict
+from typing import List
 
 import datetime
 
@@ -9,6 +10,8 @@ from pydantic import ValidationError
 
 from tia.balances import AccountingItem
 from tia.basemodels import TypedList
+from tia.client import Client
+from tia.company import Company
 from tia.invoices import Invoice
 from tia.invoices import InvoiceConfiguration
 from tia.invoices import InvoiceItem
@@ -19,7 +22,7 @@ from tia.invoices import InvoiceMetadata
 def inv_metadata_1() -> Dict[str, Any]:
     """Returns a dict for some `InvoiceMetadata`."""
     return {
-        "invoicenumber": "order",
+        "invoicenumber": "2021001",
         "value": 6.223030212187535,
         "due_to": datetime.date(2021, 9, 1),
         "vat": 2.0,
@@ -40,6 +43,70 @@ def inv_config_1() -> Dict[str, Any]:
         "currency_symbol": "$",
         "currency_code": "GMD",
     }
+
+
+@pytest.fixture
+def list_of_invoiceitems(
+    full_invoiceitem: Dict[str, Any], other_invoiceitem: Dict[str, Any]
+) -> List[InvoiceItem]:
+    """Returns a list of invoiceitems.
+
+    Args:
+        full_invoiceitem (Dict[str, Any]): [description]
+        other_invoiceitem (Dict[str, Any]): [description]
+
+    Returns:
+        List[InvoiceItem]: A list of `InvoiceItems`.
+    """
+    return [InvoiceItem(**full_invoiceitem), InvoiceItem(**other_invoiceitem)]
+
+
+@pytest.fixture
+def full_invoice_data(
+    some_client: Dict[str, Any],
+    company_data: Dict[str, Any],
+    list_of_invoiceitems: List[InvoiceItem],
+    faker: Any,
+) -> Dict[str, Any]:
+    """Returns data for an `Invoice`.
+
+    Args:
+        some_client (Dict[str, Any]): Data for some `Client`
+        company_data (Dict[str, Any]): Data for some 'Company'
+        list_of_invoiceitems (List[InvoiceItem]): List of `InvoiceItem`
+        faker (Any): faker object
+
+    Returns:
+        Dict[str, Any]: Data for an `Invoice`.
+    """
+    return {
+        "invoicenumber": "2021001",
+        "config": InvoiceConfiguration(),
+        "client": Client(**some_client),
+        "company": Company(**company_data),
+        "items": list_of_invoiceitems,
+        "payed_on": faker.date_object(),
+    }
+
+
+@pytest.fixture
+def some_invoice(full_invoice_data: Dict[str, Any]) -> Invoice:
+    """Returns some `Invoice`."""
+    return Invoice(**full_invoice_data)
+
+
+@pytest.fixture
+def empty_invoice_data(full_invoice_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Returns data for an `Invoice` without items.
+
+    Args:
+        full_invoice_data (Dict[str, Any]): Data for an invoice with items.
+
+    Returns:
+        Dict[str, Any]: Data for an empty `Invoice`.
+    """
+    full_invoice_data.pop("items")
+    return full_invoice_data
 
 
 # #################################
@@ -278,6 +345,8 @@ def test_invoice_str_representation(some_invoice: Invoice) -> None:
     ]
     assert all([isinstance(representation, str) for representation in representations])
     assert invoice.items_str == invoice.__str__()
+    assert str(invoice.config) == invoice.config.__str__()
+    assert str(invoice.config) != invoice.config.__str__(tablefmt="plain")  # type: ignore # noqa: B950
 
 
 def test_invoice_save_and_load(fake_filesystem: Any, some_invoice: Invoice) -> None:
@@ -287,5 +356,6 @@ def test_invoice_save_and_load(fake_filesystem: Any, some_invoice: Invoice) -> N
         f.write(some_invoice.json())
     with open(filename, "r") as f:
         invoice = Invoice.parse_raw(f.read())
-    assert invoice.dict() == some_invoice.dict()
-    assert Invoice.from_file(filename).dict() == some_invoice.dict()
+    assert invoice == some_invoice
+    assert Invoice.from_file(filename) == some_invoice
+    assert invoice != some_invoice.dict()

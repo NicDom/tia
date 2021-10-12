@@ -1,20 +1,10 @@
 """conftest of TIA."""
 from typing import Any
 from typing import Dict
-from typing import List
 
 import pathlib
 
 import pytest
-
-from tia.balances import AccountingConfiguration
-from tia.balances import AccountingItem
-from tia.balances import CashAccounting
-from tia.client import Client
-from tia.company import Company
-from tia.invoices import Invoice
-from tia.invoices import InvoiceConfiguration
-from tia.invoices import InvoiceItem
 
 DIR_NAMES = ["parent_dir", "pdf_parent_dir", "pdf_invoice_dir", "pdf_eur_dir"]
 
@@ -150,127 +140,6 @@ def company_data():
         "companybank": "fight",
     }
     return company_option_1
-
-
-@pytest.fixture
-def list_of_invoiceitems(
-    full_invoiceitem: Dict[str, Any], other_invoiceitem: Dict[str, Any]
-) -> List[InvoiceItem]:
-    """Returns a list of invoiceitems.
-
-    Args:
-        full_invoiceitem (Dict[str, Any]): [description]
-        other_invoiceitem (Dict[str, Any]): [description]
-
-    Returns:
-        List[InvoiceItem]: A list of `InvoiceItems`.
-    """
-    return [InvoiceItem(**full_invoiceitem), InvoiceItem(**other_invoiceitem)]
-
-
-@pytest.fixture
-def full_invoice_data(
-    some_client: Dict[str, Any],
-    company_data: Dict[str, Any],
-    list_of_invoiceitems: List[InvoiceItem],
-    faker: Any,
-) -> Dict[str, Any]:
-    """Returns data for an `Invoice`.
-
-    Args:
-        some_client (Dict[str, Any]): Data for some `Client`
-        company_data (Dict[str, Any]): Data for some 'Company'
-        list_of_invoiceitems (List[InvoiceItem]): List of `InvoiceItem`
-        faker (Any): faker object
-
-    Returns:
-        Dict[str, Any]: Data for an `Invoice`.
-    """
-    return {
-        "invoicenumber": "2021001",
-        "config": InvoiceConfiguration(),
-        "client": Client(**some_client),
-        "company": Company(**company_data),
-        "items": list_of_invoiceitems,
-        "payed_on": faker.date_object(),
-    }
-
-
-@pytest.fixture
-def empty_invoice_data(full_invoice_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Returns data for an `Invoice` without items.
-
-    Args:
-        full_invoice_data (Dict[str, Any]): Data for an invoice with items.
-
-    Returns:
-        Dict[str, Any]: Data for an empty `Invoice`.
-    """
-    full_invoice_data.pop("items")
-    return full_invoice_data
-
-
-@pytest.fixture
-def some_invoice(full_invoice_data: Dict[str, Any]) -> Invoice:
-    """Returns some `Invoice`."""
-    return Invoice(**full_invoice_data)
-
-
-@pytest.fixture
-def ca_items(
-    acc_item_1: Dict[str, Any], acc_item_2: Dict[str, Any]
-) -> List[AccountingItem]:
-    """List of some `AccountingItems`.
-
-    Args:
-        acc_item_1 (Dict[str, Any]): Dict for some`AccountingItem`
-        acc_item_2 (Dict[str, Any]): Dict for some `AccountingItem`
-
-    Returns:
-        List[AccountingItem]: List of `AccountingItem`.
-    """
-    return [AccountingItem(**acc_item_1), AccountingItem(**acc_item_2)]
-
-
-@pytest.fixture
-def acc_config() -> AccountingConfiguration:
-    """Some `AccountingConfiguration`.
-
-    Returns:
-        AccountingConfiguration: Some `AccountingConfiguration`.
-    """
-    return AccountingConfiguration()
-
-
-@pytest.fixture
-def empty_ca(acc_config: AccountingConfiguration) -> CashAccounting:
-    """`CashAccounting` without any items.
-
-    Args:
-        acc_config (AccountingConfiguration): The configuration.
-
-    Returns:
-        CashAccounting: An empty `CashAccounting`.
-    """
-    return CashAccounting(
-        config=acc_config,
-    )
-
-
-@pytest.fixture
-def some_ca(
-    acc_config: AccountingConfiguration, ca_items: List[AccountingItem]
-) -> CashAccounting:
-    """Some `CashAccounting` with items.
-
-    Args:
-        acc_config (AccountingConfiguration): The configuration.
-        ca_items (List[AccountingItem]): Some CA items.
-
-    Returns:
-        CashAccounting: The CA.
-    """
-    return CashAccounting(config=acc_config, items=ca_items)
 
 
 @pytest.fixture
