@@ -844,7 +844,7 @@ requests = "*"
 
 [[package]]
 name = "schwifty"
-version = "2021.10.1"
+version = "2021.10.2"
 description = "Validate/generate IBANs and BICs"
 category = "main"
 optional = false
@@ -1212,7 +1212,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1"
-content-hash = "87e07bcea8562123f7d783a6c796cff3d9ce67c748ca5fa6b2bff09ac5f0ebbf"
+content-hash = "9ccb5fda87c2ed2496dad83405739fdbd8d6b51c5efb2851bd1235ea6267b78e"
 
 [metadata.files]
 alabaster = [
@@ -1732,8 +1732,8 @@ safety = [
     {file = "safety-1.10.3.tar.gz", hash = "sha256:30e394d02a20ac49b7f65292d19d38fa927a8f9582cdfd3ad1adbbc66c641ad5"},
 ]
 schwifty = [
-    {file = "schwifty-2021.10.1-py3-none-any.whl", hash = "sha256:9e06ab053b5baf98a44d2dd2d173c9c203cfa51e59a632820a55507010d9aa77"},
-    {file = "schwifty-2021.10.1.tar.gz", hash = "sha256:83fdc41283cb01b49af58bffd7ed75cf7705860972380ba4a0eb2ab30da625d1"},
+    {file = "schwifty-2021.10.2-py3-none-any.whl", hash = "sha256:031d87641503d12a2bba882c6befc0b8c48f979fde7062973e5cf2041d08982b"},
+    {file = "schwifty-2021.10.2.tar.gz", hash = "sha256:26fc2c656399c042e759f98a1daab781d9391ebdc88ca60bf86e976d8189d888"},
 ]
 shellingham = [
     {file = "shellingham-1.4.0-py2.py3-none-any.whl", hash = "sha256:536b67a0697f2e4af32ab176c00a50ac2899c5a05e0d8e2dadac8e58888283f9"},
