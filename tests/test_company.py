@@ -139,3 +139,11 @@ def test_company_string_representations(company_data: Dict[str, Any]) -> None:
         [company.taxnumber],
     ]
     assert str(company) == tabulate(company.compact)
+
+
+def test_company_typedlist_related(company_data: Dict[str, Any]) -> None:
+    """`TypedList` related methods and properties are defined."""
+    company = Company(**company_data)
+    assert company.__headers__() == ["ID", "Name", "Address"]
+    assert company.__values__ == [company.name, company.address]
+    assert company.__values_str__ == company.__values__

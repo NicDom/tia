@@ -2,7 +2,7 @@
 from typing import Optional
 
 
-class TIANoInvoiceOpenedError(ValueError):  # pargma: no cover
+class TIANoInvoiceOpenedError(ValueError):  # pragma: no cover
     """Custom error that occurs, when no invoice is opened.
 
     Adding, editing and deleting items are always by TIA performed on `self.invoice`.
@@ -10,14 +10,24 @@ class TIANoInvoiceOpenedError(ValueError):  # pargma: no cover
     raised.
     """
 
-    def __init__(self, message: str = "No invoice is opened."):
+    def __init__(
+        self,
+        message: Optional[str] = None,
+        *args: object,
+    ):
         """__init__ of `TiaNoInvoiceOpenedError`.
 
         Args:
-            message (str): message that gets displayed.
+            message (str, optional): message that gets displayed. Defaults to None.
+            *args (object): Object.
         """
+        if message is None:
+            message = (
+                "No invoice is opened. Run `new_invoice` to create and open a new"
+                " invoice or use `open_invoice` to open an existing invoice."
+            )
         self.message = message
-        super().__init__(self.message)
+        super().__init__(self.message, *args)
 
 
 # class UnknownInvoiceItemError(IndexError):  # pragma: no cover

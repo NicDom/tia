@@ -19,6 +19,7 @@ from tia.balances import AccountingItem
 from tia.basemodels import DIR_NAMES
 from tia.client import Client
 from tia.company import Company
+from tia.exceptions import TIANoInvoiceOpenedError
 from tia.invoices import Invoice
 from tia.invoices import InvoiceConfiguration
 from tia.invoices import InvoiceItem
@@ -382,6 +383,28 @@ def test_tia_add_item(
     assert acc_item in tia.cash_acc
 
 
+def test_tia_add_item_exceptions(
+    fake_filesystem: Any, tia: TIA, invoiceitem: InvoiceItem
+) -> None:
+    """It raises, if no invoice was opened, when adding an item."""
+    with pytest.raises(TIANoInvoiceOpenedError):
+        tia.add_item(invoiceitem)
+
+
+def test_tia_delete_item_exceptions(
+    fake_filesystem: Any, tia: TIA, invoiceitem: InvoiceItem
+) -> None:
+    """It raises, if no invoice was opened, when deleting an item."""
+    with pytest.raises(TIANoInvoiceOpenedError):
+        tia.delete_item(invoiceitem)
+
+
+def test_tia_save_invoice_exceptions(fake_filesystem: Any, tia: TIA) -> None:
+    """It raises, if invoice is None, when saving an invoice."""
+    with pytest.raises(TIANoInvoiceOpenedError):
+        tia.save_invoice(None)
+
+
 def test_tia_edit_item(
     fake_filesystem: Any,
     tia: TIA,
@@ -435,7 +458,7 @@ def test_tia_edit_item(
     assert new_acc_item in tia.cash_acc
 
 
-def test_tia_edit_item_exception(
+def test_tia_edit_item_exception_type_match(
     fake_filesystem: Any,
     tia: TIA,
     invoiceitem: InvoiceItem,
@@ -446,7 +469,20 @@ def test_tia_edit_item_exception(
     tia.new_invoice(client=client)
     with pytest.raises(ValueError):
         tia.edit_item(invoiceitem, acc_item)
+    with pytest.raises(ValueError):
         tia.edit_item(acc_item, invoiceitem)
+
+
+def test_tia_edit_item_exception_no_invoice_opened(
+    fake_filesystem: Any,
+    tia: TIA,
+    invoiceitem: InvoiceItem,
+    acc_item: AccountingItem,
+) -> None:
+    """It raises, if no invoice is opened."""
+    with pytest.raises(TIANoInvoiceOpenedError) as excinfo:
+        tia.edit_item(invoiceitem, acc_item)
+    assert "No invoice is opened." in str(excinfo)
 
 
 def test_tia_open_invoice(fake_filesystem: Any, tia: TIA, client: Client) -> None:
@@ -464,6 +500,7 @@ def test_tia_open_invoice_exceptions(
     """It raises if the invoice does not exist."""
     with pytest.raises(ValueError):
         tia.open_invoice(some_invoice)
+    with pytest.raises(ValueError):
         tia.open_invoice("invalid")
 
 
@@ -473,7 +510,8 @@ def test_tia_get_invoice_exception(
     """It raises, if no invoice could be determined."""
     with pytest.raises(ValueError):
         tia.get_invoice(some_invoice)
-        tia.get_invoice("invalid")
+    with pytest.raises(ValueError):
+        tia.get_invoice("invalid_invoice_name")
 
 
 def test_tia_meta_list(fake_filesystem: Any, tia: TIA, client: Client) -> None:

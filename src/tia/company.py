@@ -97,21 +97,21 @@ class Company(CompanyAndClientABCBaseModel):
 
         alias_generator = company_alias_generator
 
-    @property
-    def address(self) -> str:
-        """String representation of the full company address.
+    # @property
+    # def address(self) -> str:
+    #     """String representation of the full company address.
 
-        Full address is given by:
-        `street`
-        `plz`, `city`
-        `country`
+    #     Full address is given by:
+    #     `street`
+    #     `plz`, `city`
+    #     `country`
 
-        Getter only. Setter is not defined.
+    #     Getter only. Setter is not defined.
 
-        Returns:
-            str: String representation of the full company address.
-        """
-        return f"{self.street}\n{self.plz}, {self.city}\n{self.country}"
+    #     Returns:
+    #         str: String representation of the full company address.
+    #     """
+    #     return f"{self.street}\n{self.plz}, {self.city}\n{self.country}"
 
     @property
     def contact_information(self) -> str:

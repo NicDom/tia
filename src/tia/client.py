@@ -96,21 +96,21 @@ class Client(CompanyAndClientABCBaseModel):
         """
         return v or values["email"]
 
-    @property
-    def address(self) -> str:
-        """Returns the full address of the client as a string.
+    # @property
+    # def address(self) -> str:
+    #     """Returns the full address of the client as a string.
 
-        The full address is given by:
-        `self.street`
-        `self.plz`, `self.city`
-        `self.country`
+    #     The full address is given by:
+    #     `self.street`
+    #     `self.plz`, `self.city`
+    #     `self.country`
 
-        There is no `address.setter`.
+    #     There is no `address.setter`.
 
-        Returns:
-            str: The full address as a string.
-        """
-        return f"{self.street}\n{self.plz}, {self.city}\n{self.country}"
+    #     Returns:
+    #         str: The full address as a string.
+    #     """
+    #     return f"{self.street}\n{self.plz}, {self.city}\n{self.country}"
 
     @property
     def contact_information(self) -> str:

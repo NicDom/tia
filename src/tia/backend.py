@@ -274,6 +274,7 @@ class TIA(TiaBaseModel):
             TypeError: If `invoice_or_invoicenumber` has not a str or an instance of
                 Invoice.
         """
+        print(invoice_or_invoicenumber)
         if isinstance(invoice_or_invoicenumber, str):
             for filename in self.list_files(self.invoice_dir, return_path=False):
                 if invoice_or_invoicenumber in str(filename):
@@ -439,7 +440,7 @@ class TIA(TiaBaseModel):
         Returns:
             Invoice: The created invoice.
         """
-        if items is None:
+        if items is None:  # pragma: no cover
             items = []
         invoicenumber = int(self.last_invoicenumber) + 1
         config = config or self.profile.default_invoice_config
@@ -452,9 +453,8 @@ class TIA(TiaBaseModel):
             company=company,
             items=items,
         )
-        print("start save")
-        self.save_invoice(invoice)
         self.invoice = invoice
+        self.save_invoice(invoice)
         return invoice
 
     @property
