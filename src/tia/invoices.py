@@ -47,7 +47,7 @@ class InvoiceMetadata(TiaItemModel):
     """
 
     invoicenumber: str
-    value: float = Field(..., gt=0)
+    value: float = Field(..., ge=0)
     vat: float = Field(0, ge=0, lt=100)
     due_to: datetime.date
     payed_on: Optional[datetime.date] = None
@@ -152,6 +152,17 @@ class Invoice(TiaSheetModel[InvoiceItem]):
     items: List[InvoiceItem] = []
     payed_on: Optional[datetime.date] = None
 
+    def __eq__(self, other: object) -> Any:
+        """__eq__ of invoice.
+
+        Other is no instance of `Invoice` -> return `False`.
+        Else return true, if all attributes are equal.
+        """
+        if not isinstance(other, Invoice):
+            return False
+        else:
+            return self.dict() == other.dict()
+
     def check(self, v: InvoiceItem) -> InvoiceItem:
         """Validates added items.
 
@@ -193,7 +204,7 @@ class Invoice(TiaSheetModel[InvoiceItem]):
             invoicenumber=self.invoicenumber,
             value=self.total,
             due_to=self.due_to,
-            vat=self.tax / self.subtotal * 100,
+            vat=self.tax / self.subtotal * 100 if self.subtotal != 0 else 0,
             payed_on=self.payed_on,
         )
 

@@ -125,7 +125,7 @@ class Printer(TiaBaseModel):
         pdf_dir: pathlib.Path,
         template_filename: str = TEX_TEMPLATE_BS,
         year: Optional[int] = datetime.date.today().year,
-    ) -> pathlib.Path:
+    ) -> pathlib.Path:  # pragma: no cover
         """Creates the pdf file for the CashAccounting at returns its path.
 
         Deletes all temporary files. Directory for the pdf is determined by pdf_dir.
@@ -188,7 +188,9 @@ class Printer(TiaBaseModel):
     def _invoice_substitution_dict(self, invoice: Invoice) -> Dict[str, str]:
         config: InvoiceConfiguration = invoice.config
         client_data = invoice.client.dict(by_alias=True)
-        company_data = invoice.company.dict(by_alias=True)
+        company_data = invoice.company.dict(
+            by_alias=True, exclude={"validate_account_information"}
+        )
         date = format_date(config.date, format="short", locale="en")
         res = {
             **client_data,
@@ -196,10 +198,11 @@ class Printer(TiaBaseModel):
             "items": self.invoiceitems_tex(invoice),
             "invdate": f"\\SetDate[{date}]",
             "invoicenumber": invoice.invoicenumber,
-            **invoice.config.dict(exclude={"client", "company"}),
+            **invoice.config.dict(exclude={"client", "company", "date"}),
         }
         # format datetime.timedelta for latex
         res["deadline"] = str(invoice.config.deadline.days)
+        res["vat"] = str(invoice.config.vat)
         return res
 
     def invoice_tex(
@@ -232,7 +235,7 @@ class Printer(TiaBaseModel):
         invoice: Invoice,
         pdf_dir: pathlib.Path,
         template_filename: str = TEX_TEMPLATE_INV,
-    ) -> pathlib.Path:
+    ) -> pathlib.Path:  # pragma: no cover
         """Creates the pdf file for the invoice at returns its path.
 
         Deletes all temporary files. Directory for the pdf is determined by `pdf_dir`.
@@ -270,7 +273,7 @@ class Printer(TiaBaseModel):
         os.remove(filepath)
         return pathlib.Path(pdf_dir) / f"{name}.pdf"
 
-    def delete_aux_files(self, dir: pathlib.Path) -> None:
+    def delete_aux_files(self, dir: pathlib.Path) -> None:  # pragma: no cover
         """Deletes the aux files in `dir`.
 
         Args:

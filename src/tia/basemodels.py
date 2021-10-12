@@ -337,7 +337,7 @@ class TypedList(TiaGenericModel, Generic[ItemType], MutableSequence[ItemType]):
                 instance of `list`: `True`, if all elements of the objects are equal,
                 else `False`.
         """
-        if not isinstance(other, list):
+        if not isinstance(other, MutableSequence):
             return NotImplemented
         if len(self) != len(other):
             return False
@@ -520,8 +520,35 @@ class TiaConfigBaseModel(BaseModel, ABC):
     class Config(TiaBaseConfig):
         """The Config of `ConfigBaseModel`."""
 
+    # @property
+    # def attr_names(self) -> List[str]:
+    #     """The attribute names of the config.
 
-class CompanyAndClientABCBaseModel(BaseModel, ABC):
+    #     Returns:
+    #         List[str]: List containing the names of the configuration attributes.
+    #     """
+    #     return [key for key in self.dict()]
+
+    def __str__(self, tablefmt: str = "fancy_grid") -> str:
+        """String representation of the class.
+
+        Args:
+            tablefmt (str): The format of the table.
+
+        Returns:
+            str: String representation of the class.
+        """
+        return str(
+            tabulate(
+                self.dict().items(),
+                headers=["ID", "Parameter", "Value"],
+                showindex=True,
+                tablefmt=tablefmt,
+            )
+        )
+
+
+class CompanyAndClientABCBaseModel(TiaBaseModel, ABC):
     """The BaseModel for Company and Client.
 
     Args:
@@ -540,12 +567,55 @@ class CompanyAndClientABCBaseModel(BaseModel, ABC):
     country: str
     email: str
 
-    class Config:
-        """Configuration for CompanyAndClientABCBaseModel."""
+    # class Config:
+    #     """Configuration for CompanyAndClientABCBaseModel."""
 
-        validate_assignment = True
-        extra = "forbid"
-        allow_population_by_field_name = True
+    #     validate_assignment = True
+    #     extra = "forbid"
+    #     allow_population_by_field_name = True
+
+    @property
+    def address(self) -> str:
+        """Returns the full address of the client as a string.
+
+        The full address is given by:
+        `self.street`
+        `self.plz`, `self.city`
+        `self.country`
+
+        There is no `address.setter`.
+
+        Returns:
+            str: The full address as a string.
+        """
+        return f"{self.street}\n{self.plz}, {self.city}\n{self.country}"
+
+    @classmethod
+    def __headers__(cls) -> List[str]:
+        """__headers__ dunder for `TypedList` table.
+
+        Returns:
+            List[str]: Headers for `TypedList` table.
+        """
+        return ["ID", "Name", "Address"]
+
+    @property
+    def __values__(self) -> List[Any]:
+        """__values__ dunder for `TypedList` dataframe.
+
+        Returns:
+            List[str]: Values for `TypedList` dataframe.
+        """
+        return [self.name, self.address]
+
+    @property
+    def __values_str__(self) -> List[str]:
+        """__values_str__ dunder for `TypedList` table.
+
+        Returns:
+            List[str]: Values for `TypedList` table.
+        """
+        return [str(value) for value in self.__values__]
 
 
 class TiaSheetModel(TypedList[ItemTType], Generic[ItemTType]):
